@@ -4,11 +4,13 @@ import re
 from datetime import datetime, timedelta
 #from twilio.rest import Client
 import os
-from dotenv import load_dotenv
 
 import smtplib
 from email.message import EmailMessage
 
+from dotenv import load_dotenv 
+# Load environment variables from .env file
+# This is not needed in AWS Lambda, but useful for local testing
 load_dotenv()
 
 url: str = os.getenv("url")
@@ -18,9 +20,9 @@ auth_token: str = os.getenv("auth_token")
 messaging_service_sid: str = os.getenv("messaging_service_sid")
 contactNumbers: list = os.getenv("contactNumbers")
 '''
-username = os.getenv("username")
-password = os.getenv("password")
-recipients = os.getenv("recipients")
+username: str = os.getenv("gmail_username")
+password: str = os.getenv("gmail_password")
+recipients: str = os.getenv("recipients")
 
 tomorrows_date = datetime.today() + timedelta(days=1)
 tomorrows_date: str = datetime.strftime(tomorrows_date, "%d/%m/%Y")
@@ -32,7 +34,7 @@ emoji_map = {
 }
 
 
-def parse_data() -> dict:
+def parse_data() -> list[str]:
 
     response = requests.get(url)
     # Make a BS4 object
