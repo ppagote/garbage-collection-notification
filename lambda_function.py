@@ -2,17 +2,25 @@ from bs4 import BeautifulSoup
 import requests
 import re
 from datetime import datetime, timedelta
-from twilio.rest import Client
+#from twilio.rest import Client
 import os
 from dotenv import load_dotenv
+
+import smtplib
+from email.message import EmailMessage
 
 load_dotenv()
 
 url: str = os.getenv("url")
+'''
 account_sid: str = os.getenv("account_sid")
 auth_token: str = os.getenv("auth_token")
 messaging_service_sid: str = os.getenv("messaging_service_sid")
 contactNumbers: list = os.getenv("contactNumbers")
+'''
+username = os.getenv("username")
+password = os.getenv("password")
+recipients = os.getenv("recipients")
 
 tomorrows_date = datetime.today() + timedelta(days=1)
 tomorrows_date: str = datetime.strftime(tomorrows_date, "%d/%m/%Y")
@@ -56,30 +64,45 @@ def parse_data() -> dict:
 
     return bin_data
 
+'''
+def connectTwilio(msg: str):
 
-def connectTwilio(bin_data: list[str]):
+    client = Client(account_sid, auth_token)
 
-    if len(bin_data) != 0:
-        msg = (
-            "Collection for "
-            + ", ".join(bin_data)
-            + " is tomorrow ("
-            + tomorrows_date
-            + ")"
+    for to_contact in contactNumbers:
+
+        message = client.messages.create(
+            messaging_service_sid=messaging_service_sid,
+            body=msg,
+            to=to_contact,
         )
-        print(msg)
 
-        client = Client(account_sid, auth_token)
+        print(message.sid)
+'''
 
-        for to_contact in contactNumbers:
+def send_email(msg: str):
 
-            message = client.messages.create(
-                messaging_service_sid=messaging_service_sid,
-                body=msg,
-                to=to_contact,
-            )
+    # Create the email content
+    message = EmailMessage()
+    message["Subject"] = "\u2757[URGENT] " + msg
+    message["From"] = username
+    message["To"] = recipients
 
-            print(message.sid)
+    # Send the email
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(username, password)
+        server.send_message(message)
+    print("Email sent successfully!")
+
+
+def generate_message(bin_data: list[str]) -> str:
+    return (
+        "Collection for "
+        + ", ".join(bin_data)
+        + " is tomorrow ("
+        + tomorrows_date
+        + ")"
+    )
 
 
 def lambda_handler(event, context):
@@ -87,7 +110,12 @@ def lambda_handler(event, context):
         bin_data = parse_data()
         print(bin_data)
 
-        connectTwilio(bin_data)
+        if len(bin_data) != 0:
+            msg = generate_message(bin_data)
+            print(msg)
+
+            #connectTwilio(msg)
+            send_email(msg)
 
         return "Success"
     except Exception as e:
@@ -95,4 +123,4 @@ def lambda_handler(event, context):
         return "Error"
 
 
-lambda_handler(None, None)
+#lambda_handler(None, None)
