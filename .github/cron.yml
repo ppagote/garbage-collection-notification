@@ -1,0 +1,16 @@
+on:
+  schedule:
+  - cron: '0 0 * * *' # Runs every day at midnight  # Runs every day at midnight
+jobs:
+  run-scheduled-task:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Run your script
+      run: |
+        # Add your script commands here
+        echo "Running scheduled task..."
+        # Example: python your_script.py
+        python lambda_function.py
