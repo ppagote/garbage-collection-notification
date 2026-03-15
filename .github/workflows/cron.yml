@@ -1,6 +1,6 @@
 on:
   schedule:
-  - cron: '0 0 * * *' # Runs every day at midnight  # Runs every day at midnight
+  - cron: '*/5 * * * *' # Runs every day at midnight  # Runs every day at midnight
 jobs:
   run-scheduled-task:
     runs-on: ubuntu-latest
