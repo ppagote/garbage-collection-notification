@@ -2,8 +2,8 @@ from bs4 import BeautifulSoup
 import requests
 import re
 from datetime import datetime, timedelta
-#from twilio.rest import Client
 import os
+import traceback
 
 import smtplib
 from email.message import EmailMessage
@@ -13,19 +13,12 @@ from dotenv import load_dotenv
 # This is not needed in AWS Lambda, but useful for local testing
 load_dotenv()
 
-url: str = os.getenv("url")
-'''
-account_sid: str = os.getenv("account_sid")
-auth_token: str = os.getenv("auth_token")
-messaging_service_sid: str = os.getenv("messaging_service_sid")
-contactNumbers: list = os.getenv("contactNumbers")
-'''
-username: str = os.getenv("gmail_username")
-password: str = os.getenv("gmail_password")
-recipients: str = os.getenv("recipients")
+url: str | None = os.getenv("url")
+username: str | None = os.getenv("gmail_username")
+password: str | None = os.getenv("gmail_password")
+recipients: str | None = os.getenv("recipients")
 
-tomorrows_date = datetime.today() + timedelta(days=1)
-tomorrows_date: str = datetime.strftime(tomorrows_date, "%d/%m/%Y")
+tomorrows_date: str = (datetime.today() + timedelta(days=1)).strftime("%d/%m/%Y")
 
 emoji_map = {
     "RECYCLING": "\u26AB",  # Black
@@ -33,13 +26,24 @@ emoji_map = {
     "REFUSE": "\U0001F7E2",  # Green
 }
 
-
-def parse_data() -> list[str]:
-
-    response = requests.get(url)
+def fetch_data() -> list[str]:
+    if url is None:
+        raise ValueError("Error: Missing URL configuration")
+    
+    session = requests.Session()
+    
+    response = session.get(
+            url,
+            headers={
+                'User-Agent': 'Mozilla/5.0'
+            }
+        )
     # Make a BS4 object
     soup = BeautifulSoup(response.text, features="html.parser")
     soup.prettify()
+    return parse_data(soup)
+
+def parse_data(soup: BeautifulSoup) -> list[str]:
 
     # Extract data
     bin_data: list[str] = []
@@ -66,23 +70,9 @@ def parse_data() -> list[str]:
 
     return bin_data
 
-'''
-def connectTwilio(msg: str):
-
-    client = Client(account_sid, auth_token)
-
-    for to_contact in contactNumbers:
-
-        message = client.messages.create(
-            messaging_service_sid=messaging_service_sid,
-            body=msg,
-            to=to_contact,
-        )
-
-        print(message.sid)
-'''
-
 def send_email(msg: str):
+    if username is None or password is None or recipients is None:
+        raise ValueError("Error: Missing email configuration")
 
     # Create the email content
     message = EmailMessage()
@@ -96,7 +86,6 @@ def send_email(msg: str):
         server.send_message(message)
     print("Email sent successfully!")
 
-
 def generate_message(bin_data: list[str]) -> str:
     return (
         "Collection for "
@@ -106,23 +95,23 @@ def generate_message(bin_data: list[str]) -> str:
         + ")"
     )
 
-
 def lambda_handler(event, context):
     try:
-        bin_data = parse_data()
+        bin_data = fetch_data()
         print(bin_data)
 
         if len(bin_data) != 0:
             msg = generate_message(bin_data)
             print(msg)
 
-            #connectTwilio(msg)
             send_email(msg)
+        else:
+            print("No collection data found for tomorrow.")
 
         return "Success"
     except Exception as e:
-        print(e)
-        return "Error"
+        print(traceback.format_exc())
+        return "Error: " + str(e)
 
 
-#lambda_handler(None, None)
+lambda_handler(None, None)
