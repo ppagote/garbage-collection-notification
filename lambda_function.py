@@ -8,15 +8,21 @@ import traceback
 import smtplib
 from email.message import EmailMessage
 
-from dotenv import load_dotenv 
+#from dotenv import load_dotenv 
 # Load environment variables from .env file
 # This is not needed in AWS Lambda, but useful for local testing
-load_dotenv()
-
+#load_dotenv()
+'''
 url: str | None = os.getenv("url")
 username: str | None = os.getenv("gmail_username")
 password: str | None = os.getenv("gmail_password")
 recipients: str | None = os.getenv("recipients")
+'''
+url: str | None = os.environ.get("URL")
+print("URL:", url)
+username: str | None = os.environ.get("GMAIL_USERNAME")
+password: str | None = os.environ.get("GMAIL_PASSWORD")
+recipients: str | None = os.environ.get("RECEPIENTS")
 
 tomorrows_date: str = (datetime.today() + timedelta(days=1)).strftime("%d/%m/%Y")
 
