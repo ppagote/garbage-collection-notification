@@ -4,7 +4,6 @@ on:
       - main
       - master
   schedule:
-  - cron: '*/5 * * * *' # Runs every day at midnight  # Runs every day at midnight
   - cron: '0 17 * * 4'  # Thursday at 5 PM UTC
   - cron: '0 21 * * 4'  # Thursday at 9 PM UTC
   - cron: '0 17 * * 5'  # Friday at 5 PM UTC
@@ -35,7 +34,11 @@ jobs:
         GMAIL_PASSWORD: ${{ secrets.GMAIL_PASSWORD }}
         RECEPIENTS: ${{ secrets.RECEPIENTS }} 
       run: |
+        set -e  # Exit on any error
         # Add your script commands here
         echo "Running scheduled task..."
         # Example: python your_script.py
         python lambda_function.py
+        # Optional: Explicit check (though set -e handles it)
+        # if [ $? -ne 0 ]; then exit 1; fi
+        // ...existing code...
