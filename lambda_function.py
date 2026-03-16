@@ -13,10 +13,10 @@ from email.message import EmailMessage
 # This is not needed in AWS Lambda, but useful for local testing
 #load_dotenv()
 
-url: str | None = os.getenv("url")
-username: str | None = os.getenv("gmail_username")
-password: str | None = os.getenv("gmail_password")
-recipients: str | None = os.getenv("recipients")
+url: str | None = os.getenv("URL")
+username: str | None = os.getenv("GMAIL_USERNAME")
+password: str | None = os.getenv("GMAIL_PASSWORD")
+recipients: str | None = os.getenv("RECEPIENTS")
 
 tomorrows_date: str = (datetime.today() + timedelta(days=1)).strftime("%d/%m/%Y")
 
