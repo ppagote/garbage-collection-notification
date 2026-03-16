@@ -19,6 +19,11 @@ jobs:
         pip install -r requirements.txt
         
     - name: Run your script
+      env:
+        URL: ${{ secrets.URL }}
+        GMAIL_USERNAME: ${{ secrets.GMAIL_USERNAME }}
+        GMAIL_PASSWORD: ${{ secrets.GMAIL_PASSWORD }}
+        RECEPIENTS: ${{ secrets.RECEPIENTS }} 
       run: |
         # Add your script commands here
         echo "Running scheduled task..."
