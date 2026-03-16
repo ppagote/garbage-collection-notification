@@ -1,6 +1,16 @@
 on:
+  push:
+    branches:
+      - main
+      - master
   schedule:
   - cron: '*/5 * * * *' # Runs every day at midnight  # Runs every day at midnight
+  - cron: '0 17 * * 4'  # Thursday at 5 PM UTC
+  - cron: '0 21 * * 4'  # Thursday at 9 PM UTC
+  - cron: '0 17 * * 5'  # Friday at 5 PM UTC
+  - cron: '0 21 * * 5'  # Friday at 9 PM UTC
+  - cron: '0 17 * * 0'  # Sunday at 5 PM UTC
+  - cron: '0 21 * * 0'  # Sunday at 9 PM UTC
 jobs:
   run-scheduled-task:
     runs-on: ubuntu-latest
